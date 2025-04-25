@@ -39,7 +39,7 @@ class SplashScreenState extends State<SplashScreen>
     _animationController.forward();
 
     Timer(const Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/login');
     });
   }
 
@@ -80,6 +80,7 @@ class SplashScreenState extends State<SplashScreen>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
+                          // ignore: deprecated_member_use
                           color: Colors.black.withOpacity(0.2),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
@@ -95,6 +96,7 @@ class SplashScreenState extends State<SplashScreen>
                           color: const Color(0xFF2196F3),
                           shadows: [
                             Shadow(
+                              // ignore: deprecated_member_use
                               color: Colors.black.withOpacity(0.1),
                               offset: const Offset(0, 2),
                               blurRadius: 4,
@@ -138,12 +140,14 @@ class SplashScreenState extends State<SplashScreen>
                   width: 200,
                   height: 4,
                   decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
                     color: Colors.white.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: LinearProgressIndicator(
                     backgroundColor: Colors.transparent,
                     valueColor: AlwaysStoppedAnimation<Color>(
+                      // ignore: deprecated_member_use
                       Colors.white.withOpacity(0.8),
                     ),
                   ),
