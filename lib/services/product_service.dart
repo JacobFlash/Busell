@@ -1,20 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/product.dart';
+import '../services/storage_service.dart';
 
 class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final _storageService = StorageService();
 
   // Collection reference
   CollectionReference get _productsCollection =>
       _firestore.collection('products');
 
   // Get all products for the current user
-  Stream<List<Product>> getUserProducts() {
-    final userId = _auth.currentUser?.uid;
-    if (userId == null) return Stream.value([]);
-
+  Stream<List<Product>> getUserProducts(String userId) {
     return _productsCollection
         .where('sellerId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
@@ -46,12 +45,20 @@ class ProductService {
     await _productsCollection.doc(product.id).update(product.toMap());
   }
 
-  // Delete a product (soft delete by updating status)
+  // Delete a product (permanent delete from Firestore and storage)
   Future<void> deleteProduct(String productId) async {
-    await _productsCollection.doc(productId).update({
-      'status': 'deleted',
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    try {
+      // First get the product to access its images
+      final product = await getProduct(productId);
+      if (product != null) {
+        // Delete images from storage
+        await _storageService.deleteImages(product.images);
+        // Delete the product document
+        await _productsCollection.doc(productId).delete();
+      }
+    } catch (e) {
+      throw Exception('Failed to delete product: $e');
+    }
   }
 
   // Mark a product as sold
@@ -78,18 +85,20 @@ class ProductService {
 
   // Search products
   Stream<List<Product>> searchProducts(String query) {
+    if (query.isEmpty) return getActiveProducts();
+
+    final lowercaseQuery = query.toLowerCase();
     return _productsCollection
         .where('status', isEqualTo: 'active')
-        .orderBy('title')
-        .startAt([query])
-        .endAt([query + '\uf8ff'])
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => Product.fromMap(
-                  {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
-              .toList();
-        });
+      return snapshot.docs
+          .map((doc) => Product.fromMap(
+              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .where(
+              (product) => product.title.toLowerCase().contains(lowercaseQuery))
+          .toList();
+    });
   }
 
   // Get products by category

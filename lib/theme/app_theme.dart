@@ -101,8 +101,11 @@ class AppTheme {
           letterSpacing: 1.1,
         ),
       ),
+      primaryColor: const Color(0xFF6200EE),
     );
   }
+
+  static Color get primaryColor => const Color(0xFF6200EE);
 
   static BoxDecoration get glassyContainer {
     return BoxDecoration(

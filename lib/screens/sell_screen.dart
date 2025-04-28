@@ -126,7 +126,8 @@ class _SellScreenState extends State<SellScreen> {
                   ),
                   const Spacer(),
                   StreamBuilder<List<Product>>(
-                    stream: _productService.getUserProducts(),
+                    stream:
+                        _productService.getUserProducts(_auth.currentUser!.uid),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) return const SizedBox();
                       return Text(
@@ -145,7 +146,7 @@ class _SellScreenState extends State<SellScreen> {
             // Products List
             Expanded(
               child: StreamBuilder<List<Product>>(
-                stream: _productService.getUserProducts(),
+                stream: _productService.getUserProducts(_auth.currentUser!.uid),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
@@ -281,7 +282,8 @@ class _SellScreenState extends State<SellScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => MessagesScreen(
+                                            builder: (context) =>
+                                                MessagesScreen(
                                               productId: product.id,
                                             ),
                                           ),
