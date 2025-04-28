@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -16,6 +17,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  bool _isLoading = false;
+  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -24,6 +27,50 @@ class _SignupScreenState extends State<SignupScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signUp() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // For testing: Allow any email/password/name combination
+      await _authService.signUpWithEmailAndPassword(
+        _emailController.text.trim(),
+        _passwordController.text,
+        _nameController.text.trim(),
+      );
+      if (!mounted) return;
+      // Redirect to login page after regular signup
+      Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    // Placeholder for future Google Sign-in implementation
+      ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Google Sign-in will be available soon!'),
+        backgroundColor: Colors.blue,
+        ),
+      );
   }
 
   @override
@@ -158,38 +205,44 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // TODO: Implement signup logic
-                          Navigator.pushReplacementNamed(context, '/home');
-                        }
-                      },
-                      child: const Text('Sign Up'),
+                      onPressed: _isLoading ? null : _signUp,
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text('Sign Up'),
                     ),
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: Implement Google sign in
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                      icon: const Icon(
-                        Icons.g_mobiledata,
-                        size: 32,
+                      onPressed: _isLoading ? null : _signInWithGoogle,
+                      icon: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Image.asset(
+                          'assets/images/google_logo.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       label: const Text('Continue with Google'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 16),
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          "Already have an account?",
+                          "Already have an account? ",
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/login');
-                          },
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  Navigator.pushNamed(context, '/login');
+                                },
                           child: const Text(
                             'Sign In',
                             style: TextStyle(

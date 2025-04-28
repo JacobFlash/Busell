@@ -1,10 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'firebase_options.dart';
+import 'config/supabase_config.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/admin_screen.dart';
+import 'screens/admin_dashboard_screen.dart';
+import 'screens/forgot_password_screen.dart';
+import 'screens/sell_screen.dart';
 import 'theme/app_theme.dart';
+import 'services/auth_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Initialize Supabase
+  await SupabaseConfig.initialize();
+
   runApp(const MyApp());
 }
 
@@ -13,16 +33,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Busell',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
-      routes: {
-        '/home': (context) => const HomePage(),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
-      },
+    return ChangeNotifierProvider(
+      create: (_) => AuthService(),
+      child: MaterialApp(
+        title: 'Busell',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const SplashScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/signup': (context) => const SignupScreen(),
+          '/home': (context) => const HomeScreen(),
+          '/forgot-password': (context) => const ForgotPasswordScreen(),
+          '/admin': (context) => const AdminScreen(),
+          '/admin-dashboard': (context) => const AdminDashboardScreen(),
+          '/sell': (context) => const SellScreen(),
+        },
+      ),
     );
   }
 }

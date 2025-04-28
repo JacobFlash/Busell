@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -13,6 +14,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
+  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -21,14 +24,58 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _signIn() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // For testing: Allow any email/password combination
+      await _authService.signInWithEmailAndPassword(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    // Placeholder for future Google Sign-in implementation
+      ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Google Sign-in will be available soon!'),
+        backgroundColor: Colors.blue,
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: AppTheme.glassyContainer,
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: SafeArea(
+            child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Container(
                 padding: const EdgeInsets.all(24),
@@ -101,29 +148,52 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () {
+                                      Navigator.pushNamed(
+                                          context, '/forgot-password');
+                                    },
+                              child: const Text(
+                                'Forgot Password?',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // TODO: Implement login logic
-                        }
-                      },
-                      child: const Text('Sign In'),
+                      onPressed: _isLoading ? null : _signIn,
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text('Sign In'),
                     ),
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: Implement Google sign in
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                      icon: const Icon(
-                        Icons.g_mobiledata,
-                        size: 32,
+                      onPressed: _isLoading ? null : _signInWithGoogle,
+                      icon: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Image.asset(
+                          'assets/images/google_logo.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       label: const Text('Continue with Google'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 16),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Row(
@@ -134,9 +204,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/signup');
-                          },
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  Navigator.pushNamed(context, '/signup');
+                                },
                           child: const Text(
                             'Sign Up',
                             style: TextStyle(
@@ -146,6 +218,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton.icon(
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              Navigator.pushNamed(context, '/admin');
+                            },
+                      icon: const Icon(Icons.admin_panel_settings),
+                      label: const Text(
+                        'Admin Login',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

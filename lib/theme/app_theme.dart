@@ -107,7 +107,7 @@ class AppTheme {
   static BoxDecoration get glassyContainer {
     return BoxDecoration(
       gradient: primaryGradient,
-      borderRadius: BorderRadius.circular(20),
+      // Removed border radius as requested
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.1),

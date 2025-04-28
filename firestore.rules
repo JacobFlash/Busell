@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isValidProduct() {
+      return request.resource.data.keys().hasAll(['title', 'description', 'price', 'category', 'images', 'sellerId', 'sellerName', 'status', 'createdAt'])
+        && request.resource.data.title is string
+        && request.resource.data.description is string
+        && request.resource.data.price is number
+        && request.resource.data.category is string
+        && request.resource.data.images is list
+        && request.resource.data.sellerId is string
+        && request.resource.data.sellerName is string
+        && request.resource.data.status in ['active', 'sold', 'deleted']
+        && request.resource.data.createdAt is timestamp;
+    }
+    
+    function isValidUser() {
+      return request.resource.data.keys().hasAll(['name', 'email', 'role', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.role in ['user', 'admin']
+        && request.resource.data.createdAt is timestamp;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      // Allow read if user is authenticated and is the owner or an admin
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Allow create if user is authenticated and data is valid
+      allow create: if isAuthenticated() && 
+        request.auth.uid == userId &&
+        isValidUser();
+      
+      // Allow update if user is the owner or an admin
+      allow update: if isAuthenticated() && 
+        (isOwner(userId) || isAdmin()) &&
+        isValidUser();
+      
+      // Allow delete only for admins
+      allow delete: if isAdmin();
+    }
+
+    // Products collection rules
+    match /products/{productId} {
+      // Allow read if product is active or user is the owner or an admin
+      allow read: if isAuthenticated() && 
+        (resource.data.status == 'active' || 
+         isOwner(resource.data.sellerId) || 
+         isAdmin());
+      
+      // Allow create if user is authenticated and data is valid
+      allow create: if isAuthenticated() && 
+        request.auth.uid == request.resource.data.sellerId &&
+        isValidProduct();
+      
+      // Allow update if user is the owner or an admin
+      allow update: if isAuthenticated() && 
+        (isOwner(resource.data.sellerId) || isAdmin()) &&
+        isValidProduct();
+      
+      // Allow delete if user is the owner or an admin (soft delete)
+      allow delete: if isAuthenticated() && 
+        (isOwner(resource.data.sellerId) || isAdmin());
+    }
+  }
+}

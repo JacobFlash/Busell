@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "44442734089",
+    "project_id": "mkplace-b9637",
+    "storage_bucket": "mkplace-b9637.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44442734089:android:334d66f556b362a71972d8",
+        "android_client_info": {
+          "package_name": "com.busell8888.marketplace"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "44442734089-2luf5evnhhaka5bb13v6ct9i9gaje6tg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.busell8888.marketplace",
+            "certificate_hash": "27caf75a157a5725b51669547b13e7ace895865e"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRLG54HmJlEjBu_Ho7ynX4h7rPtMuwR7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
