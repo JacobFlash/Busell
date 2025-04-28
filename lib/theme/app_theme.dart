@@ -19,16 +19,19 @@ class AppTheme {
     ],
   );
 
+  static const backgroundColor = Color(0xFFF5F5F5);
+  static const primaryColor = Color(0xFF6200EE);
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.light(
-        primary: const Color(0xFF9C27B0), // Purple
+        primary: primaryColor,
         secondary: const Color(0xFF757575), // Grey
         surface: Colors.white,
-        background: const Color(0xFFF5F5F5),
+        background: backgroundColor,
       ),
-      scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+      scaffoldBackgroundColor: backgroundColor,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -43,7 +46,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF9C27B0), // Purple
+          foregroundColor: primaryColor,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
@@ -101,16 +104,12 @@ class AppTheme {
           letterSpacing: 1.1,
         ),
       ),
-      primaryColor: const Color(0xFF6200EE),
     );
   }
-
-  static Color get primaryColor => const Color(0xFF6200EE);
 
   static BoxDecoration get glassyContainer {
     return BoxDecoration(
       gradient: primaryGradient,
-      // Removed border radius as requested
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.1),

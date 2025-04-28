@@ -54,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       radius: 40,
                       backgroundColor: Colors.white.withOpacity(0.2),
                       child: Icon(
-                        Icons.person,
+                              Icons.person,
                         size: 40,
                         color: Colors.white.withOpacity(0.8),
                       ),
@@ -63,24 +63,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
+                      children: [
+                        Text(
                             user.displayName ?? 'Anonymous User',
-                            style: const TextStyle(
-                              color: Colors.white,
+                          style: const TextStyle(
+                            color: Colors.white,
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
                           const SizedBox(height: 4),
-                          Text(
+                        Text(
                             user.email ?? '',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 14,
-                            ),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14,
                           ),
-                        ],
+                        ),
+                      ],
                       ),
                     ),
                     IconButton(
@@ -114,10 +114,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
 
               // Tabs
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
                     _buildTab('My Listings', 0),
                     _buildTab('Purchase History', 1),
                   ],
@@ -143,7 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+        color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -154,8 +154,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.white.withOpacity(0.8),
             fontSize: 14,
           ),
-        ),
-      ],
+          ),
+        ],
     );
   }
 
@@ -249,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
           itemCount: products.length,
           itemBuilder: (context, index) {
             final product = products[index];
@@ -270,7 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       width: 100,
                       height: 100,
-                      decoration: BoxDecoration(
+      decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.1),
                         borderRadius: const BorderRadius.horizontal(
                           left: Radius.circular(12),
@@ -291,21 +291,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Icons.image,
                                 color: Colors.white54,
                                 size: 40,
-                              ),
-                            ),
-                    ),
+          ),
+        ),
+      ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
                               product.title,
-                              style: const TextStyle(
+                style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -316,37 +316,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.8),
                                 fontSize: 14,
-                              ),
-                            ),
+                ),
+              ),
                             const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
                                 color: product.status == 'active'
                                     ? Colors.green.withOpacity(0.2)
                                     : Colors.red.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
                                 product.status.toUpperCase(),
-                                style: TextStyle(
+                  style: TextStyle(
                                   color: product.status == 'active'
                                       ? Colors.green
                                       : Colors.red,
                                   fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+              ),
+            ],
+          ),
+                ),
+              ),
+            ],
+          ),
               ),
             );
           },
