@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../services/product_service.dart';
 import 'add_product_screen.dart';
 import 'messages_screen.dart';
+import 'product_detail_screen.dart';
 
 class SellScreen extends StatefulWidget {
   const SellScreen({Key? key}) : super(key: key);
@@ -272,7 +273,14 @@ class _SellScreenState extends State<SellScreen> {
                                       icon: Icons.visibility,
                                       label: 'View',
                                       onPressed: () {
-                                        // TODO: Implement view product details
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ProductDetailScreen(
+                                              product: product,
+                                            ),
+                                          ),
+                                        );
                                       },
                                     ),
                                     _buildActionButton(

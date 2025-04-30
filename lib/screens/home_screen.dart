@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../theme/app_theme.dart';
 import '../models/product.dart';
+import '../models/order.dart';
 import '../services/product_service.dart';
+import '../services/cart_service.dart';
+import '../services/order_service.dart';
 import 'profile_screen.dart';
 import 'product_detail_screen.dart';
 
@@ -20,6 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 2;
   final _productService = ProductService();
   final _auth = FirebaseAuth.instance;
+  final _cartService = CartService();
+  final _orderService = OrderService();
 
   @override
   void initState() {
@@ -47,10 +52,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (index == 0) {
       // Categories tab
-      // TODO: Implement categories screen
+      Navigator.pushNamed(context, '/categories');
+      // Reset the selected index to home
+      setState(() {
+        _selectedIndex = 2;
+      });
     } else if (index == 1) {
       // Cart tab
-      // TODO: Implement cart screen
+      Navigator.pushNamed(context, '/cart');
+      // Reset the selected index to home
+      setState(() {
+        _selectedIndex = 2;
+      });
     } else if (index == 2) {
       // Home tab (middle)
       // Already on home screen
@@ -78,6 +91,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildProductCard(Product product) {
     final isOwnProduct = product.sellerId == _auth.currentUser?.uid;
+
+    return StreamBuilder<List<Product>>(
+      stream: _cartService.getUserCart(),
+      builder: (context, snapshot) {
+        final cartItems = snapshot.data ?? [];
+        final isInCart = cartItems.any((item) => item.id == product.id);
 
     return GestureDetector(
       onTap: () {
@@ -131,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         product.title,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                              fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,
@@ -140,9 +159,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 4),
                       Text(
                         '\$${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 12,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
                         ),
                       ),
                     ],
@@ -160,14 +179,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.8),
+                        color: Colors.black.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
-                    'Y',
+                        'Your Item',
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (isInCart)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'In Cart',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
                     ),
                   ),
                 ),
@@ -175,11 +216,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+        );
+      },
     );
   }
 
   Widget _buildProductListItem(Product product) {
     final isOwnProduct = product.sellerId == _auth.currentUser?.uid;
+
+    return StreamBuilder<List<Product>>(
+      stream: _cartService.getUserCart(),
+      builder: (context, snapshot) {
+        final cartItems = snapshot.data ?? [];
+        final isInCart = cartItems.any((item) => item.id == product.id);
 
     return GestureDetector(
       onTap: () {
@@ -226,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -237,32 +286,22 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
-                          maxLines: 1,
+                              maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '\$${product.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                              style: const TextStyle(
+                                color: Colors.white,
                             fontSize: 14,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          product.description,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
             ),
             if (isOwnProduct)
               Positioned(
@@ -274,14 +313,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.8),
+                        color: Colors.black.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
-                    'Y',
+                        'Your Item',
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (isInCart)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'In Cart',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
                     ),
                   ),
                 ),
@@ -289,6 +350,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+        );
+      },
     );
   }
 
@@ -316,12 +379,87 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    Row(
+                      children: [
+                        StreamBuilder<List<Order>>(
+                          stream: _orderService.getOrders(),
+                          builder: (context, snapshot) {
+                            final pendingOrders = snapshot.data
+                                    ?.where(
+                                        (order) => order.status == 'pending')
+                                    .length ??
+                                0;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Stack(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.pending_actions,
+                                          color: Colors.white),
+                                      onPressed: () {
+                                        Navigator.pushNamed(
+                                            context, '/pending-orders');
+                                      },
+                                    ),
+                                    if (pendingOrders > 0)
+                                      Positioned(
+                                        right: 0,
+                                        top: 0,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          constraints: const BoxConstraints(
+                                            minWidth: 16,
+                                            minHeight: 16,
+                                          ),
+                                          child: Text(
+                                            pendingOrders.toString(),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const Text(
+                                  'Orders',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                     IconButton(
-                      icon:
-                          const Icon(Icons.notifications, color: Colors.white),
+                              icon: const Icon(Icons.notifications,
+                                  color: Colors.white),
                       onPressed: () {
                         // TODO: Implement notifications
                       },
+                            ),
+                            const Text(
+                              'Alerts',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -442,7 +580,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Icon(
                               _searchQuery.isEmpty
-                                  ? Icons.inventory_2_outlined
+                                  ? Icons.inventory_2
                                   : Icons.search_off,
                               size: 64,
                               color: Colors.white.withOpacity(0.7),
@@ -451,12 +589,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               _searchQuery.isEmpty
                                   ? 'No products available'
-                                  : 'No products found for "$_searchQuery"',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
+                                  : 'No results found',
+                              style: const TextStyle(
+                                color: Colors.white,
                                 fontSize: 16,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ],
                         ),
@@ -464,20 +601,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
 
                     return SingleChildScrollView(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (_searchQuery.isEmpty)
-                      const Text(
-                        'Available Products',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
                       _isGridView
                           ? GridView.builder(
                               shrinkWrap: true,
@@ -521,35 +647,70 @@ class _HomeScreenState extends State<HomeScreen> {
             top: Radius.circular(20),
           ),
         ),
-        child: BottomNavigationBar(
+        child: StreamBuilder<List<Product>>(
+          stream: _cartService.getUserCart(),
+          builder: (context, snapshot) {
+            final cartItemCount = snapshot.data?.length ?? 0;
+
+            return BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           backgroundColor: Colors.transparent,
           selectedItemColor: AppTheme.primaryColor,
           unselectedItemColor: Colors.white70,
           type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(
+              items: [
+                const BottomNavigationBarItem(
               icon: Icon(Icons.category),
               label: 'Categories',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
+                  icon: Stack(
+                    children: [
+                      const Icon(Icons.shopping_cart),
+                      if (cartItemCount > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              cartItemCount.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
               label: 'Cart',
             ),
-            BottomNavigationBarItem(
+                const BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
             ),
-            BottomNavigationBarItem(
+                const BottomNavigationBarItem(
               icon: Icon(Icons.add_circle_outline),
               label: 'Sell',
             ),
-            BottomNavigationBarItem(
+                const BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Profile',
             ),
           ],
+            );
+          },
         ),
       ),
     );

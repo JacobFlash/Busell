@@ -36,6 +36,17 @@ service cloud.firestore {
         && request.resource.data.createdAt is timestamp;
     }
 
+    function isValidOrder() {
+      return request.resource.data.keys().hasAll(['buyerId', 'sellerId', 'productId', 'status', 'totalAmount', 'createdAt', 'updatedAt'])
+        && request.resource.data.buyerId is string
+        && request.resource.data.sellerId is string
+        && request.resource.data.productId is string
+        && request.resource.data.status in ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']
+        && request.resource.data.totalAmount is number
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+    }
+
     // Users collection rules
     match /users/{userId} {
       // Allow read if user is authenticated and is the owner or an admin
@@ -76,6 +87,41 @@ service cloud.firestore {
       // Allow delete if user is the owner or an admin (soft delete)
       allow delete: if isAuthenticated() && 
         (isOwner(resource.data.sellerId) || isAdmin());
+    }
+
+    // Cart collection rules
+    match /carts/{userId} {
+      // Allow read and write if user is authenticated and is the owner
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      // Allow read if user is an admin
+      allow read: if isAdmin();
+    }
+
+    // Cart items subcollection rules
+    match /carts/{userId}/items/{itemId} {
+      // Allow read and write if user is authenticated and is the owner
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      // Allow read if user is an admin
+      allow read: if isAdmin();
+    }
+
+    // Orders collection rules
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.buyerId || 
+         request.auth.uid == resource.data.sellerId || 
+         isAdmin());
+      allow create: if isAuthenticated() && 
+        request.auth.uid == request.resource.data.buyerId &&
+        isValidOrder();
+      allow update: if isAuthenticated() && 
+        (request.auth.uid == resource.data.sellerId || 
+         request.auth.uid == resource.data.buyerId || 
+         isAdmin()) &&
+        isValidOrder();
+      allow delete: if isAdmin();
     }
   }
 }

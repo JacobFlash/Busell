@@ -90,13 +90,13 @@ class ProductService {
         .where('status', isEqualTo: 'active')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Product.fromMap(
-              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          return snapshot.docs
+              .map((doc) => Product.fromMap(
+                  {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
           .where(
               (product) => product.title.toLowerCase().contains(lowercaseQuery))
-          .toList();
-    });
+              .toList();
+        });
   }
 
   // Get products by category

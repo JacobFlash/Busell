@@ -11,6 +11,10 @@ import 'screens/admin_screen.dart';
 import 'screens/admin_dashboard_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/sell_screen.dart';
+import 'screens/cart_screen.dart';
+import 'screens/categories_screen.dart';
+import 'screens/checkout_screen.dart';
+import 'screens/pending_orders_screen.dart';
 import 'theme/app_theme.dart';
 import 'services/auth_service.dart';
 
@@ -49,6 +53,10 @@ class MyApp extends StatelessWidget {
           '/admin': (context) => const AdminScreen(),
           '/admin-dashboard': (context) => const AdminDashboardScreen(),
           '/sell': (context) => const SellScreen(),
+          '/cart': (context) => CartScreen(),
+          '/categories': (context) => const CategoriesScreen(),
+          '/checkout': (context) => CheckoutScreen(),
+          '/pending-orders': (context) => PendingOrdersScreen(),
         },
       ),
     );
