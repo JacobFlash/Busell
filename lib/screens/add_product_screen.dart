@@ -12,7 +12,7 @@ import '../services/storage_service.dart';
 class AddProductScreen extends StatefulWidget {
   final Product? product;
 
-  const AddProductScreen({Key? key, this.product}) : super(key: key);
+  const AddProductScreen({super.key, this.product});
 
   @override
   State<AddProductScreen> createState() => _AddProductScreenState();
@@ -26,11 +26,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String _selectedCategory = 'Electronics';
 
   // For mobile platforms
-  List<File> _selectedImages = [];
+  final List<File> _selectedImages = [];
   // For web platform
-  List<Uint8List> _selectedImageBytes = [];
+  final List<Uint8List> _selectedImageBytes = [];
   // For displaying images
-  List<dynamic> _selectedImageData = [];
+  final List<dynamic> _selectedImageData = [];
 
   List<String> _existingImages = [];
   bool _isLoading = false;

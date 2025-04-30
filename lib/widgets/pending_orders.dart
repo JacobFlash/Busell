@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PendingOrders extends StatelessWidget {
-  const PendingOrders({Key? key}) : super(key: key);
+  const PendingOrders({super.key});
 
   @override
   Widget build(BuildContext context) {

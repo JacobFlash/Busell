@@ -8,7 +8,7 @@ import 'messages_screen.dart';
 import 'product_detail_screen.dart';
 
 class SellScreen extends StatefulWidget {
-  const SellScreen({Key? key}) : super(key: key);
+  const SellScreen({super.key});
 
   @override
   State<SellScreen> createState() => _SellScreenState();

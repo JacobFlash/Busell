@@ -3,7 +3,7 @@ import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 
 class AdminScreen extends StatefulWidget {
-  const AdminScreen({Key? key}) : super(key: key);
+  const AdminScreen({super.key});
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();

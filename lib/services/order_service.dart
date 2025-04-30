@@ -52,7 +52,7 @@ class OrderService {
           .snapshots()
           .map<List<Order>>((snapshot) {
         return snapshot.docs
-            .map<Order>((doc) => Order.fromMap(doc.data() as Map<String, dynamic>))
+            .map<Order>((doc) => Order.fromMap(doc.data()))
             .toList();
       });
     } catch (e) {
@@ -73,7 +73,7 @@ class OrderService {
           .snapshots()
           .map<List<Order>>((snapshot) {
         return snapshot.docs
-            .map<Order>((doc) => Order.fromMap(doc.data() as Map<String, dynamic>))
+            .map<Order>((doc) => Order.fromMap(doc.data()))
             .toList();
       });
     } catch (e) {

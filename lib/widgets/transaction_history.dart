@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TransactionHistory extends StatelessWidget {
-  const TransactionHistory({Key? key}) : super(key: key);
+  const TransactionHistory({super.key});
 
   @override
   Widget build(BuildContext context) {

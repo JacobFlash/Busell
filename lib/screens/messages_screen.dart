@@ -4,7 +4,7 @@ import '../theme/app_theme.dart';
 class MessagesScreen extends StatefulWidget {
   final String? productId;
 
-  const MessagesScreen({Key? key, this.productId}) : super(key: key);
+  const MessagesScreen({super.key, this.productId});
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
@@ -168,7 +168,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 class ChatScreen extends StatefulWidget {
   final Map<String, dynamic> chat;
 
-  const ChatScreen({Key? key, required this.chat}) : super(key: key);
+  const ChatScreen({super.key, required this.chat});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
