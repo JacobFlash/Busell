@@ -147,6 +147,17 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                     fontSize: 16,
                   ),
                 ),
+                if (order.status == 'cancelled' &&
+                    order.cancellationReason != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Reason: ${order.cancellationReason}',
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
                 if (order.status == 'pending') const SizedBox(height: 16),
                 if (order.status == 'pending')
                   Row(

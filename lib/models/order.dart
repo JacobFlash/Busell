@@ -11,6 +11,7 @@ class Order {
   final double totalAmount;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? cancellationReason;
 
   Order({
     required this.id,
@@ -23,6 +24,7 @@ class Order {
     required this.totalAmount,
     required this.createdAt,
     required this.updatedAt,
+    this.cancellationReason,
   });
 
   Map<String, dynamic> toMap() {
@@ -37,6 +39,7 @@ class Order {
       'totalAmount': totalAmount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'cancellationReason': cancellationReason,
     };
   }
 
@@ -52,7 +55,7 @@ class Order {
       totalAmount: (map['totalAmount'] as num).toDouble(),
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       updatedAt: (map['updatedAt'] as Timestamp).toDate(),
+      cancellationReason: map['cancellationReason'] as String?,
     );
   }
 }
- 

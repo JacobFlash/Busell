@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../theme/app_theme.dart';
 import '../models/product.dart';
 import '../services/product_service.dart';
+import '../services/cart_service.dart';
 import 'product_detail_screen.dart';
+import '../widgets/product_tag.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -19,6 +21,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   final _productService = ProductService();
   final _auth = FirebaseAuth.instance;
   String? _selectedCategory;
+  final _cartService = CartService();
 
   final List<String> _categories = [
     'Electronics',
@@ -36,7 +39,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   void _onSearchChanged() {
-                              setState(() {
+    setState(() {
       _searchQuery = _searchController.text;
     });
   }
@@ -51,216 +54,224 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget _buildProductCard(Product product) {
     final isOwnProduct = product.sellerId == _auth.currentUser?.uid;
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: product),
+    return StreamBuilder<List<Product>>(
+      stream: _cartService.getUserCart(),
+      builder: (context, snapshot) {
+        final cartItems = snapshot.data ?? [];
+        final isInCart = cartItems.any((item) => item.id == product.id);
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductDetailScreen(product: product),
+              ),
+            );
+          },
+          child: Container(
+            decoration: AppTheme.glassyCard,
+            child: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
+                        ),
+                        child: product.images.isNotEmpty
+                            ? ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(12),
+                                ),
+                                child: Image.network(
+                                  product.images.first,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const Center(
+                                child: Icon(
+                                  Icons.image,
+                                  color: Colors.white54,
+                                  size: 40,
+                                ),
+                              ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (isOwnProduct)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: ProductTag(
+                      type: 'owner',
+                      backgroundColor: Colors.black,
+                    ),
+                  ),
+                if (isInCart)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: ProductTag(
+                      type: 'cart',
+                      backgroundColor: Colors.green,
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       },
-      child: Container(
-        decoration: AppTheme.glassyCard,
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12),
-                      ),
-                    ),
-                    child: product.images.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(12),
-                            ),
-                            child: Image.network(
-                              product.images.first,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : const Center(
-                            child: Icon(
-                              Icons.image,
-                              color: Colors.white54,
-                              size: 40,
-                            ),
-                          ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        product.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (isOwnProduct)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'Y',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildProductListItem(Product product) {
     final isOwnProduct = product.sellerId == _auth.currentUser?.uid;
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: product),
+    return StreamBuilder<List<Product>>(
+      stream: _cartService.getUserCart(),
+      builder: (context, snapshot) {
+        final cartItems = snapshot.data ?? [];
+        final isInCart = cartItems.any((item) => item.id == product.id);
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductDetailScreen(product: product),
+              ),
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: AppTheme.glassyCard,
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: const BorderRadius.horizontal(
+                          left: Radius.circular(12),
+                        ),
+                      ),
+                      child: product.images.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: const BorderRadius.horizontal(
+                                left: Radius.circular(12),
+                              ),
+                              child: Image.network(
+                                product.images.first,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Center(
+                              child: Icon(
+                                Icons.image,
+                                color: Colors.white54,
+                                size: 40,
+                              ),
+                            ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              product.title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '\$${product.price.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              product.description,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.6),
+                                fontSize: 12,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (isOwnProduct)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: ProductTag(
+                      type: 'owner',
+                      backgroundColor: Colors.black,
+                    ),
+                  ),
+                if (isInCart)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: ProductTag(
+                      type: 'cart',
+                      backgroundColor: Colors.green,
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: AppTheme.glassyCard,
-        child: Stack(
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(12),
-                    ),
-                  ),
-                  child: product.images.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: const BorderRadius.horizontal(
-                            left: Radius.circular(12),
-                          ),
-                          child: Image.network(
-                            product.images.first,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : const Center(
-                          child: Icon(
-                            Icons.image,
-                            color: Colors.white54,
-                            size: 40,
-                          ),
-                        ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${product.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          product.description,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (isOwnProduct)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'Y',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 

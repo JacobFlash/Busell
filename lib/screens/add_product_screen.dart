@@ -97,6 +97,38 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
   }
 
+  Future<void> _takePhoto() async {
+    try {
+      final XFile? photo = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 80,
+      );
+
+      if (photo != null) {
+        setState(() {
+          if (kIsWeb) {
+            photo.readAsBytes().then((bytes) {
+              setState(() {
+                _selectedImageBytes.add(bytes);
+                _selectedImageData.add(bytes);
+              });
+            });
+          } else {
+            final file = File(photo.path);
+            _selectedImages.add(file);
+            _selectedImageData.add(file);
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error taking photo: $e')),
+      );
+    }
+  }
+
   Future<void> _removeImage(int index) async {
     setState(() {
       if (index < _existingImages.length) {
@@ -217,111 +249,149 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   children: [
                     // Image Upload Section
                     Container(
-                      height: 200,
+                      constraints: const BoxConstraints(
+                        minHeight: 200,
+                        maxHeight: 300,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(color: Colors.grey[300]!),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (_selectedImageData.isEmpty &&
-                              _existingImages.isEmpty)
-                            Column(
-                              children: [
-                                Icon(
-                                  Icons.add_photo_alternate,
-                                  size: 50,
-                                  color: Colors.grey[600],
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_selectedImageData.isEmpty &&
+                                _existingImages.isEmpty)
+                              Container(
+                                height: 150,
+                                alignment: Alignment.center,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_photo_alternate,
+                                      size: 50,
+                                      color: Colors.grey[600],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      'Add Photos',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  'Add Photos',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            )
-                          else
-                            Expanded(
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.all(8),
-                                itemCount: _existingImages.length +
-                                    _selectedImageData.length,
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: Stack(
-                                      children: [
-                                        Container(
-                                          width: 100,
-                                          height: 100,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            image: DecorationImage(
-                                              image: index <
-                                                      _existingImages.length
-                                                  ? NetworkImage(
-                                                      _existingImages[index])
-                                                  : kIsWeb
-                                                      ? MemoryImage(
-                                                          _selectedImageBytes[
-                                                              index -
-                                                                  _existingImages
-                                                                      .length])
-                                                      : FileImage(_selectedImages[
-                                                              index -
-                                                                  _existingImages
-                                                                      .length])
-                                                          as ImageProvider,
-                                              fit: BoxFit.cover,
+                              )
+                            else
+                              SizedBox(
+                                height: 150,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  padding: const EdgeInsets.all(8),
+                                  itemCount: _existingImages.length +
+                                      _selectedImageData.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: Stack(
+                                        children: [
+                                          Container(
+                                            width: 100,
+                                            height: 100,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              image: DecorationImage(
+                                                image: index <
+                                                        _existingImages.length
+                                                    ? NetworkImage(
+                                                        _existingImages[index])
+                                                    : kIsWeb
+                                                        ? MemoryImage(
+                                                            _selectedImageBytes[
+                                                                index -
+                                                                    _existingImages
+                                                                        .length])
+                                                        : FileImage(_selectedImages[
+                                                                index -
+                                                                    _existingImages
+                                                                        .length])
+                                                            as ImageProvider,
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Positioned(
-                                          right: 0,
-                                          top: 0,
-                                          child: IconButton(
-                                            icon: const Icon(Icons.close),
-                                            color: Colors.red,
-                                            onPressed: () =>
-                                                _removeImage(index),
+                                          Positioned(
+                                            right: 0,
+                                            top: 0,
+                                            child: IconButton(
+                                              icon: const Icon(Icons.close),
+                                              color: Colors.red,
+                                              onPressed: () =>
+                                                  _removeImage(index),
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: _pickImages,
+                                  icon: const Icon(Icons.add_photo_alternate),
+                                  label: Text(
+                                    _selectedImageData.isEmpty &&
+                                            _existingImages.isEmpty
+                                        ? 'Add Photos'
+                                        : 'Add More',
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
                                     ),
-                                  );
-                                },
-                              ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                if (!kIsWeb) // Only show camera button on mobile
+                                  ElevatedButton.icon(
+                                    onPressed: _takePhoto,
+                                    icon: const Icon(Icons.camera_alt),
+                                    label: const Text('Take Photo'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).primaryColor,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                          const SizedBox(height: 10),
-                          ElevatedButton.icon(
-                            onPressed: _pickImages,
-                            icon: const Icon(Icons.add_photo_alternate),
-                            label: Text(
-                              _selectedImageData.isEmpty &&
-                                      _existingImages.isEmpty
-                                  ? 'Add Photos'
-                                  : 'Add More Photos',
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ],
+                            const SizedBox(height: 10),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
